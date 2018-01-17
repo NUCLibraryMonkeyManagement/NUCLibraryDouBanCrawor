@@ -4,11 +4,17 @@
 #
 # See documentation in:
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-
+import base64
+import random
+import scrapy
 from scrapy import signals
-
+from scrapy.downloadermiddlewares.httpproxy import HttpProxyMiddleware
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+import random
+from crawDouBan.GetIP import GetIP
 
 class CrawdoubanSpiderMiddleware(object):
+    handle_httpstatus_list = [403]
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the
     # passed objects.
@@ -101,3 +107,45 @@ class CrawdoubanDownloaderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+import scrapy
+from scrapy import signals
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+import random
+
+
+
+class MyUserAgentMiddleware(UserAgentMiddleware):
+    '''
+    设置User-Agent
+    '''
+
+    def __init__(self, user_agent):
+        self.user_agent = user_agent
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        return cls(
+            user_agent=crawler.settings.get('MY_USER_AGENT')
+        )
+    def process_request(self, request, spider):
+        agent = random.choice(self.user_agent)
+        request.headers['User-Agent'] = agent
+        print(agent)
+        request.headers.setdefault('User-Agent', agent)
+class RandomProxyMiddleware(HttpProxyMiddleware):
+
+    def __init__(self,ip=''):
+        self.ip=ip
+    #动态设置ip代理
+    def process_request(self, request, spider):
+        get_ip = GetIP()
+        request.meta["proxy"] = get_ip.get_random_ip()
+        print("到这")
+    def process_response(self, request, response, spider):
+        if(response.status==403):
+            print(response.status)
+            get_ip = GetIP()
+            request.meta["proxy"] = get_ip.get_random_ip()
+
+        return response

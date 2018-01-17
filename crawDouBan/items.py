@@ -12,8 +12,12 @@ class CrawdoubanItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     title = scrapy.Field()
-
+    desc = scrapy.Field()
     score = scrapy.Field()
-    qote =scrapy.Field()
-
+    view_num =scrapy.Field()
+    text = scrapy.Field()
+    img_url = scrapy.Field()
+    public_time = scrapy.Field()
+    price = scrapy.Field()
+    type = scrapy.Field()
     pass
